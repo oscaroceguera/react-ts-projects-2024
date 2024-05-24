@@ -1,5 +1,5 @@
 import Header from "./components/Header";
-import Guitar from "./components/Guitar";
+import GuitarComp from "./components/Guitar";
 import useCart from "./hooks/useCart";
 
 function App() {
@@ -32,7 +32,11 @@ function App() {
         <div className="row mt-5">
           {data.map((guitar) => {
             return (
-              <Guitar key={guitar.id} guitar={guitar} setCart={addToCart} />
+              <GuitarComp
+                key={guitar.id}
+                guitar={guitar}
+                addToCart={addToCart}
+              />
             );
           })}
         </div>
