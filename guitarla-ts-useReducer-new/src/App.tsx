@@ -1,56 +1,62 @@
-import Header from "./components/Header";
-import GuitarComp from "./components/Guitar";
-import useCart from "./hooks/useCart";
+import MenuItem from "./components/MenuItem"
+import OrderContents from "./components/OrderContents"
+import OrderTotals from "./components/OrderTotals"
+import TipPercentageForm from "./components/TipPercentageForm"
+import { menuItems } from "./data/db"
+import useOrder from "./hooks/useOrder"
 
 function App() {
-  const {
-    cart,
-    removeFromCart,
-    clearCart,
-    decrementQuantity,
-    increaseQuantity,
-    data,
-    addToCart,
-    isEmpty,
-    cartTotal,
-  } = useCart();
+
+  const { order, tip, setTip, addItem, removeItem, placeOrder } = useOrder()
 
   return (
     <>
-      <Header
-        cart={cart}
-        removeFromCart={removeFromCart}
-        increaseQuantity={increaseQuantity}
-        decrementQuantity={decrementQuantity}
-        clearCart={clearCart}
-        isEmpty={isEmpty}
-        cartTotal={cartTotal}
-      />
+        <header className=" bg-teal-400 py-5">
+          <h1 className="text-center text-4xl font-black">Calculadora de Propinas y Consumo</h1>
+        </header>
 
-      <main className="container-xl mt-5">
-        <h2 className="text-center">Nuestra Colección</h2>
-        <div className="row mt-5">
-          {data.map((guitar) => {
-            return (
-              <GuitarComp
-                key={guitar.id}
-                guitar={guitar}
-                addToCart={addToCart}
-              />
-            );
-          })}
-        </div>
-      </main>
+        <main className=" max-w-7xl mx-auto py-20 grid md:grid-cols-2">
+          <div className='p-5'>
+            <h2 className='font-black text-4xl'>Menú</h2>
 
-      <footer className="bg-dark mt-5 py-5">
-        <div className="container-xl">
-          <p className="text-white text-center fs-4 mt-4 m-md-0">
-            GuitarLA - Todos los derechos Reservados
-          </p>
-        </div>
-      </footer>
+            <div className='mt-10 space-y-3'>
+              {menuItems.map(item => (
+                <MenuItem 
+                  key={item.id}
+                  item={item}
+                  addItem={addItem}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="border border-dashed border-slate-300 p-5 rounded-lg space-y-10">
+            {order.length ? (
+              <>
+                  <OrderContents
+                    order={order}
+                    removeItem={removeItem}
+                  />
+                  <TipPercentageForm 
+                    setTip={setTip}
+                    tip={tip}
+                  />
+                  <OrderTotals 
+                    order={order}
+                    tip={tip}
+                    placeOrder={placeOrder}
+                  />
+              </>
+            ) : (
+              <p className="text-center">La orden esta vacia</p>
+            )}
+ 
+
+          </div>
+        </main>
+
     </>
-  );
+  )
 }
 
-export default App;
+export default App
