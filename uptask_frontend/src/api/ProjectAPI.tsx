@@ -39,11 +39,14 @@ export async function getProjectById(id: Project["_id"]) {
   }
 }
 
-type ProjectApiTyoe = {
+type ProjectApiType = {
   formData: ProjectFormData;
   projectId: Project["_id"];
 };
-export async function updateProject({ formData, projectId }: ProjectApiTyoe) {
+export async function updateProject({
+  formData,
+  projectId,
+}: Pick<ProjectApiType, "formData" | "projectId">) {
   try {
     const { data } = await api.put<string>(`/projects/${projectId}`, formData);
     return data;
