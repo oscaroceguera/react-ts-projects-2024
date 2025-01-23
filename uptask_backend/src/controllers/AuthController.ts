@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { hashPassword } from "../utils/auth";
+import { checkPassword, hashPassword } from "../utils/auth";
 import User from "../models/User";
 import { generateToken } from "../utils/token";
 import Token from "../models/Token";
@@ -51,7 +51,7 @@ export class AuthController {
 
       if (!tokenExist) {
         const error = new Error("Token no valido");
-        return res.status(401).json({ error: error.message });
+        return res.status(404).json({ error: error.message });
       }
 
       const user = await User.findById(tokenExist.user);
@@ -59,6 +59,50 @@ export class AuthController {
 
       await Promise.allSettled([user.save(), tokenExist.deleteOne()]);
       res.send("Cuenta confirmada correctament");
+    } catch (error) {
+      res.status(500).json({ error: "Hubo un error" });
+    }
+  };
+
+  static login = async (req: Request, res: Response) => {
+    try {
+      const { password, email } = req.body;
+
+      // Check if user exists
+      const user = await User.findOne({ email });
+      if (!user) {
+        const error = new Error("El usuario no encontrado");
+        return res.status(404).json({ error: error.message });
+      }
+
+      // Check cuenta verificada
+      if (!user.confirmed) {
+        const token = new Token();
+        token.user = user.id;
+        token.token = generateToken();
+        await token.save();
+
+        // enviar email
+        AuthEmail.sendConfirmationEmail({
+          email: user.email,
+          name: user.name,
+          token: token.token,
+        });
+
+        const error = new Error(
+          "La cuenta no ha sido confirmada, hemos enviado un email de confirmacion"
+        );
+        return res.status(401).json({ error: error.message });
+      }
+
+      // Check password
+      const isPasswordCorrect = await checkPassword(password, user.password);
+      if (!isPasswordCorrect) {
+        const error = new Error("Password Incorrecto!!!");
+        return res.status(401).json({ error: error.message });
+      }
+
+      res.send("Autenticado!!!!!");
     } catch (error) {
       res.status(500).json({ error: "Hubo un error" });
     }
