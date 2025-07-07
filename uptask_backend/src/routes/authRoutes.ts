@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import { AuthController } from "../controllers/AuthController";
 import { handleInputError } from "../middleware/validation";
 
@@ -42,6 +42,37 @@ router.post(
   body("email").isEmail().withMessage("E-mail no válido"),
   handleInputError,
   AuthController.requestConfirmationCode
+);
+
+router.post(
+  "/forgot-password",
+  body("email").isEmail().withMessage("E-mail no válido"),
+  handleInputError,
+  AuthController.forgotPassword
+);
+
+router.post(
+  "/validate-token",
+  body("token").notEmpty().withMessage("El Token no puede ir vacio"),
+  handleInputError,
+  AuthController.validateToken
+);
+
+router.post(
+  "/update-password/:token",
+  param("token").isNumeric().withMessage("Token no valido"),
+  body("name").notEmpty().withMessage("El nombre no puede ir vacio"),
+  body("password")
+    .isLength({ min: 8 })
+    .withMessage("El password es muy corto, minimo 8 caracteres"),
+  body("password_confirmation").custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error("Los passwords no son iguales");
+    }
+    return true;
+  }),
+  handleInputError,
+  AuthController.updatePasswordWithToken
 );
 
 export default router;
