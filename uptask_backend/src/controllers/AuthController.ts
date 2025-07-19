@@ -4,6 +4,7 @@ import User from "../models/User";
 import { generateToken } from "../utils/token";
 import Token from "../models/Token";
 import { AuthEmail } from "../emails/AuthEmail";
+import { generateJWT } from "../utils/jwt";
 
 export class AuthController {
   static createAccount = async (req: Request, res: Response) => {
@@ -101,8 +102,8 @@ export class AuthController {
         const error = new Error("Password Incorrecto!!!");
         return res.status(401).json({ error: error.message });
       }
-
-      res.send("Autenticado!!!!!");
+      const token = generateJWT({ id: user.id });
+      res.send(token);
     } catch (error) {
       res.status(500).json({ error: "Hubo un error" });
     }
@@ -212,5 +213,9 @@ export class AuthController {
     } catch (error) {
       res.status(500).json({ error: "Hubo un error" });
     }
+  };
+
+  static user = async (req: Request, res: Response) => {
+    return res.json(req.user);
   };
 }

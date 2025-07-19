@@ -5,11 +5,15 @@ import { handleInputError } from "../middleware/validation";
 import { TaskController } from "../controllers/TaskController";
 import { validateProjectExists } from "../middleware/project";
 import { taskBelongsToProject, taskExists } from "../middleware/task";
+import { authenticate } from "../middleware/auth";
+import { TeamMemberController } from "../controllers/TeamContrller";
 
 const router = Router();
+router.use(authenticate);
 
 router.post(
   "/",
+  //  authenticate,
   body("projectName")
     .notEmpty()
     .withMessage("El Nombre del Proyecto es Obligatorio"),
@@ -27,6 +31,7 @@ router.get("/", ProjectController.getAllProjects);
 
 router.get(
   "/:id",
+  // authenticate,
   param("id").isMongoId().withMessage("ID no valido"),
   handleInputError,
   ProjectController.getProjectById
@@ -108,6 +113,30 @@ router.post(
   body("status").notEmpty().withMessage("El estado es obligatorio"),
   handleInputError,
   TaskController.updateStatus
+);
+
+/** Routes for team */
+router.get(
+  "/:projectId/team/find",
+  body("email").isEmail().toLowerCase().withMessage("E-mail no válido"),
+  handleInputError,
+  TeamMemberController.findMemberByEmail
+);
+
+router.get("/:projectId/team", TeamMemberController.getProyectTeam);
+
+router.post(
+  "/:projectId/team",
+  body("id").isMongoId().withMessage("ID No Válido"),
+  handleInputError,
+  TeamMemberController.addMemberById
+);
+
+router.delete(
+  "/:projectId/team",
+  body("id").isMongoId().withMessage("ID No Válido"),
+  handleInputError,
+  TeamMemberController.removeMemberById
 );
 
 export default router;

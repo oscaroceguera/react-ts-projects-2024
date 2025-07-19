@@ -33,6 +33,18 @@ export const taskStatusSchema = z.enum([
 
 export type TaskStatus = z.infer<typeof taskStatusSchema>;
 
+// Users
+export const userSchema = authSchema
+  .pick({
+    name: true,
+    email: true,
+  })
+  .extend({
+    _id: z.string(),
+  });
+
+export type User = z.infer<typeof userSchema>;
+
 // Tasks
 export const taskSchema = z.object({
   _id: z.string(),
@@ -69,3 +81,14 @@ export type ProjectFormData = Pick<
   Project,
   "projectName" | "clientName" | "description"
 >;
+
+/** Team */
+
+const teamMemberSchema = userSchema.pick({
+  name: true,
+  email: true,
+  _id: true,
+});
+
+export type TeamMember = z.infer<typeof teamMemberSchema>;
+export type TeamMemberForm = Pick<TeamMember, "email">;
